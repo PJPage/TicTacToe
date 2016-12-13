@@ -5,7 +5,7 @@ var grid;
 var usersTurn = false;
 
 var PIECE_SIZE = 104;
-var OFFSET = 2;
+var OFFSET = 20;
 var GRID_SIZE  = 3;
 
 window.onload = function() {
@@ -46,7 +46,7 @@ window.onload = function() {
 }
 
 function newGame() {
-    print("");
+    print(" ");
     grid = [];
     for (var i = 0; i < Math.pow(GRID_SIZE, 2); i++) {
         grid.push(0);
@@ -55,34 +55,65 @@ function newGame() {
 }
 
 function update() {
-    ctx.fillStyle = "gray";
-    ctx.fillRect(OFFSET, OFFSET, c.width - 2 * OFFSET, c.height - 2 * OFFSET);
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawLines();
 
     for (var y = 0; y < GRID_SIZE; y++) {
         for (var x = 0; x < GRID_SIZE; x++) {
             switch (grid[coorToPos(x, y)]) {
-                case 0:
-                    ctx.fillStyle = "white";
-                    ctx.fillRect(x * PIECE_SIZE + OFFSET, y * PIECE_SIZE + OFFSET, 100, 100);
-                    break;
                 case 1:
-                    displayImage("x.png", x * PIECE_SIZE + OFFSET, y * PIECE_SIZE + OFFSET);
+                    drawX(x, y);
                     break;
                 case 2:
-                    displayImage("o.png", x * PIECE_SIZE + OFFSET, y * PIECE_SIZE + OFFSET);
+                    drawO(x, y);
                     break;
             }
         }
     }
 }
 
-function displayImage(src, xpos, ypos) {
-    var img = document.createElement("img");
-    img.src = src;
-    img.width = PIECE_SIZE;
-    img.height = PIECE_SIZE;
+function drawLines() {
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (var i = 1; i < GRID_SIZE; i++) {
+        pos = i * PIECE_SIZE;
+        ctx.moveTo(pos, 0);
+        ctx.lineTo(pos, canvas.height);
+        ctx.moveTo(0, pos);
+        ctx.lineTo(canvas.width, pos);
+    }
+    ctx.stroke();
+}
 
-    ctx.drawImage(img, xpos, ypos);
+function drawX(x, y) {
+
+    ctx.lineWidth = 2;
+
+    var xLeft = x * PIECE_SIZE + OFFSET;
+    var xRight = (x + 1) * PIECE_SIZE - OFFSET;
+    var yTop = y * PIECE_SIZE + OFFSET;
+    var yBottom = (y + 1) * PIECE_SIZE - OFFSET;
+
+    ctx.beginPath();
+    ctx.moveTo(xLeft, yTop);
+    ctx.lineTo(xRight, yBottom);
+    ctx.moveTo(xRight, yTop);
+    ctx.lineTo(xLeft, yBottom);
+    ctx.stroke();
+}
+
+function drawO(x, y) {
+
+    ctx.lineWidth = 2;
+
+    var centerX = x * PIECE_SIZE + PIECE_SIZE / 2;
+    var centerY = y * PIECE_SIZE + PIECE_SIZE / 2;
+    var radius = PIECE_SIZE / 2 - OFFSET;
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.stroke();
 }
 
 function checkVictory() {
