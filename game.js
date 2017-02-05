@@ -4,28 +4,39 @@ var ctx;
 var grid; 
 var usersTurn = false;
 
-var PIECE_SIZE = 104;
-var OFFSET = 20;
-var GRID_SIZE  = 3;
+var gridSize = 3;
+var boardColor = "#EEEEEE"
+var pieceSize;
+var offset;
+
+function setCanvasSize() {
+    if (window.innerWidth > window.innerHeight) {
+        c.width = c.height = window.innerHeight * 0.8;
+    } else {
+        c.width = c.height = window.innerWidth * 0.8;
+    }
+
+    pieceSize = c.width / gridSize;
+    offset = pieceSize / 5;
+}
 
 window.onload = function() {
     c = document.getElementById("canvas");
     ctx = c.getContext("2d");
 
-    c.width  = GRID_SIZE * PIECE_SIZE;
-    c.height = GRID_SIZE * PIECE_SIZE;
+    setCanvasSize();
 
     newGame();
 
-    setInterval(update, 1000/30);
+    requestAnimationFrame(update);
     c.addEventListener("click", function(event) {
 
         var rect = c.getBoundingClientRect();
         var mouseX = event.clientX - rect.left;
         var mouseY = event.clientY - rect.top;
 
-        var x = Math.floor(mouseX / PIECE_SIZE);
-        var y = Math.floor(mouseY / PIECE_SIZE);
+        var x = Math.floor(mouseX / pieceSize);
+        var y = Math.floor(mouseY / pieceSize);
 
         if (usersTurn) {
             if (grid[coorToPos(x, y)] == 0) {
@@ -43,24 +54,26 @@ window.onload = function() {
         }
 
     }, false);
+
+    window.addEventListener("resize", setCanvasSize, false);
 }
 
 function newGame() {
     print(" ");
     grid = [];
-    for (var i = 0; i < Math.pow(GRID_SIZE, 2); i++) {
+    for (var i = 0; i < Math.pow(gridSize, 2); i++) {
         grid.push(0);
     }
     usersTurn = true;
 }
 
 function update() {
-    ctx.fillStyle = "white";
+    ctx.fillStyle = boardColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawLines();
 
-    for (var y = 0; y < GRID_SIZE; y++) {
-        for (var x = 0; x < GRID_SIZE; x++) {
+    for (var y = 0; y < gridSize; y++) {
+        for (var x = 0; x < gridSize; x++) {
             switch (grid[coorToPos(x, y)]) {
                 case 1:
                     drawX(x, y);
@@ -71,13 +84,14 @@ function update() {
             }
         }
     }
+    requestAnimationFrame(update);
 }
 
 function drawLines() {
     ctx.lineWidth = 2;
     ctx.beginPath();
-    for (var i = 1; i < GRID_SIZE; i++) {
-        pos = i * PIECE_SIZE;
+    for (var i = 1; i < gridSize; i++) {
+        pos = i * pieceSize;
         ctx.moveTo(pos, 0);
         ctx.lineTo(pos, canvas.height);
         ctx.moveTo(0, pos);
@@ -90,10 +104,10 @@ function drawX(x, y) {
 
     ctx.lineWidth = 2;
 
-    var xLeft = x * PIECE_SIZE + OFFSET;
-    var xRight = (x + 1) * PIECE_SIZE - OFFSET;
-    var yTop = y * PIECE_SIZE + OFFSET;
-    var yBottom = (y + 1) * PIECE_SIZE - OFFSET;
+    var xLeft = x * pieceSize + offset;
+    var xRight = (x + 1) * pieceSize - offset;
+    var yTop = y * pieceSize + offset;
+    var yBottom = (y + 1) * pieceSize - offset;
 
     ctx.beginPath();
     ctx.moveTo(xLeft, yTop);
@@ -107,9 +121,9 @@ function drawO(x, y) {
 
     ctx.lineWidth = 2;
 
-    var centerX = x * PIECE_SIZE + PIECE_SIZE / 2;
-    var centerY = y * PIECE_SIZE + PIECE_SIZE / 2;
-    var radius = PIECE_SIZE / 2 - OFFSET;
+    var centerX = x * pieceSize + pieceSize / 2;
+    var centerY = y * pieceSize + pieceSize / 2;
+    var radius = pieceSize / 2 - offset;
 
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
